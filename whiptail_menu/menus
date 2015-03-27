@@ -1,0 +1,137 @@
+#!/bin/bash
+
+##FONGOH MARTIN TAYONG
+##fongohmartin@gmail.com
+## __3c310n__ 
+
+## Free for all modification but don't remove header.
+
+###--------------------------------------------------
+###------------------------------FUNCTIONS START HERE
+
+userInputNameAndPressedOk(){
+    exit_status=0
+    while [ $exitstatus != 1 ]; do
+      displayFirstMenu
+      exitstatus=$?
+
+    
+      if [ "$menuOneValue" = "Last User" ]; then #the user needs to know the last logged on user
+        lastLoggedUser=$(last -1 | cut -d " " -f 1 |grep -v wtmp)
+        whiptail --title "Unix Admin Menu ( UnAM ) --> Last Logged User <-- " --msgbox "The last logged user is: $lastLoggedUser" 8 78 
+
+        exitstatus=$?
+        if [ "$subExitValue" == "<-- Exit To UnAm " ]; then
+          goodByMessage
+        fi
+      fi
+
+      if [ "$menuOneValue" = "ip address" ]; then #the user needs to see the computer's ip address
+        ipAddress=$(ifconfig wlan0 | grep  "inet addr" | cut -d : -f 2 | cut -d " " -f 1)
+        if [ "$ipAddress" != "" ]; then
+          whiptail --title "Unix Admin Menu ( UnAM ) --> Ip Address <-- " --msgbox "You Ip address is : $ipAddress" 8 78 
+        else
+          whiptail --title "Unix Admin Menu ( UnAM ) --> Ip Address <-- " --msgbox "Your computer is not connected to any network\nSo you dont have an ip" 8 78 
+        fi
+        exitstatus=$?
+      fi
+
+      if [ "$menuOneValue" = "Sub menu" ]; then #test if office is installed
+        #display the sub menu
+        displaySecondMenu
+        #get the exit status value
+        exitstatus=$?
+        if [ "$menuTwoValue" = "Check Office" ]; then
+          officeLoc=$(which libreoffice4.2)
+          if [ "$officeLoc" != "" ]; then
+            whiptail --title "Unix Admin Menu ( UnAM ) |$menuTwoValue|--> Office <-- " --msgbox "Office is installed and the loc is $officeLoc" 8 78 
+          else
+            whiptail --title "Unix Admin Menu ( UnAM ) --> Office<-- " --msgbox "You dont have office installed $officeLoc" 8 78 
+          fi
+          exitstatus=$?
+        else
+          echo "ending"
+          #goodByMessage
+
+        fi
+
+        
+        exitstatus=$?
+      fi
+
+      if [ "$menuOneValue" = "Exit" ]; then
+        goodByMessage
+      fi
+    done
+    goodByMessage
+}
+
+progressBar(){
+
+  {
+    for ((i = 0 ; i <= 100 ; i+=5)); do
+        sleep 0.01
+        echo $i
+    done
+  } | whiptail --gauge "Please wait while we load settings..." 6 50 0
+
+}
+
+goodByMessage(){
+  {
+    for ((i = 0 ; i <= 100 ; i+=5)); do
+        sleep 0.1
+        echo $i
+    done
+  } | whiptail --gauge " Thanks for using UnAM  $IUSERNAME . Cleaning up ..." 6 50 0
+  reset
+  exit 0;
+}
+
+displayFirstMenu(){
+  menuOneValue=$(whiptail --title "Unix Admin Menu --> $IUSERNAME <-- " --nocancel --menu "Choose an option" 14 78 5 \
+    "Last User" "   : Information of last logged user" \
+    "ip address" "  : Show ip address of this computer" \
+    "Sub menu" "    :  Explore more menus" \
+    "Exit" "    :  Exit Back to Home" 3>&1 1>&2 2>&3 )
+}
+
+displaySecondMenu(){
+  menuTwoValue=$(whiptail --title "Unix Admin Menu --> $IUSERNAME" --nocancel --menu "Choose an option" 14 78 5   \
+          "Check Office" " Is libre office installed on computer?" \
+          "<-- Back    : " " Exit" 3>&1 1>&2 2>&3 )
+}
+
+
+###---------------------------------------------------
+###--------------------------------FUNCTIONS ENDS HERE
+
+
+
+
+
+
+
+
+
+
+
+
+
+### SCRIPT STARTS HERE
+progressBar
+whiptail --title "Unix Admin Menu ( UnAM ) " --msgbox "Welcome to the Unix admin Menu" 8 78
+
+#INPUTS 
+IUSERNAME=$(whiptail --inputbox "Welcome to Your Name Please" 8 78 Fongoh --title "Unix admin Menus --> NameInput <--" 3>&1 1>&2 2>&3)
+                                                                        # A trick to swap stdout and stderr.
+# Again, you can pack this inside if, but it seems really long for some 80-col terminal users.
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+    # echo "User selected Ok and entered " $IUSERNAME
+    userInputNameAndPressedOk
+else
+    echo "User selected Cancel."
+fi
+ 
+echo "(Exit status was $exitstatus)"
